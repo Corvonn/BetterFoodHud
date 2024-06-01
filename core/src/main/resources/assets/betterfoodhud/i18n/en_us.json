@@ -1,0 +1,42 @@
+{
+    "betterfoodhud": {
+        "settings": {
+            "name": "Better Food HUD",
+            "enabled": {
+                "name": "Enabled"
+            },
+            "showFoodIncrement": {
+                "name": "Expected nutrition gain",
+                "description": "A visual indication of the expected increase in nutrition from the food you currently have in hand."
+            },
+            "showEstimatedHealthIncrement": {
+                "name": "Estimated healing",
+                "description": "Visually indicates the expected healing achieved by eating the food you have in your hand.\nPlease note that this value is only an estimate and may differ significantly!\nThe ‘1.7 Hearts’ feature is deactivated in 1.17.2 - 1.20.1 if this feature is active."
+            },
+            "showSaturationIncrement": {
+                "name": "Expected saturation gain",
+                "description": "Visualizes the expected saturation gain from eating the food you are holding."
+            },
+            "showCurrentSaturation": {
+                "name": "Current saturation",
+                "description": "Adds a golden border to the Minecraft food HUD to show how full you currently are."
+            },
+            "maxOpacity": {
+                "name": "Maximum opacity",
+                "description": "Sets the maximum opacity of the visualizations."
+            },
+            "blinkingSettings": {
+                "name": "Blinking",
+                "speed": {
+                    "name": "Period duration",
+                    "description": "Sets the period duration of the flashing in milliseconds."
+                }
+            },
+            "header": {
+                "settings": {
+                    "name": "Settings"
+                }
+            }
+        }
+    }
+}

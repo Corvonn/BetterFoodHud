@@ -13,9 +13,6 @@ public class BetterFoodHud extends LabyAddon<Config> {
   protected void enable() {
     this.registerSettingCategory();
     instance = this;
-
-
-    this.logger().info("Enabled the Addon");
   }
 
   @Override

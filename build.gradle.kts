@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.example"
-version = "1.0.0"
+version = "1.0.1"
 
 labyMod {
     defaultPackageName = "de.corvonn.betterFoodHud" //change this to your main package name (used by all modules)
@@ -16,8 +16,8 @@ labyMod {
         displayName = "Better Food HUD"
         author = "Corvonn"
         description = "Provides some helpful features to the HUD related to food."
-        minecraftVersion = "1.8.9<1.20.6"
-        version = System.getenv().getOrDefault("VERSION", "1.0.0")
+        minecraftVersion = "1.8.9<1.21"
+        version = System.getenv().getOrDefault("VERSION", "1.0.1")
     }
 
     minecraft {
@@ -35,6 +35,7 @@ labyMod {
                 "1.20.4",
                 "1.20.5",
                 "1.20.6",
+                "1.21",
         ) { version, provider ->
             configureRun(provider, version)
 

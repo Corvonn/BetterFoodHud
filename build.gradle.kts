@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.example"
-version = "1.0.1"
+version = "1.0.2"
 
 labyMod {
     defaultPackageName = "de.corvonn.betterFoodHud" //change this to your main package name (used by all modules)

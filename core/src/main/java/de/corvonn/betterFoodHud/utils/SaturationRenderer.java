@@ -1,42 +1,37 @@
 package de.corvonn.betterFoodHud.utils;
 
 import de.corvonn.betterFoodHud.BetterFoodHud;
+import de.corvonn.betterFoodHud.configs.Config;
 import net.labymod.api.Laby;
 import net.labymod.api.client.entity.player.ClientPlayer;
+import net.labymod.api.client.render.draw.ResourceRenderer;
 import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.resources.ResourceLocation;
+import net.labymod.api.configuration.loader.property.ConfigProperty;
+import net.labymod.api.generated.ReferenceStorage;
 import org.jetbrains.annotations.Nullable;
 
 public class SaturationRenderer {
-    private int printed = 0;
-    private final float saturationLevel;
-    private final float saturationLevelAfterEating;
+    public static final SaturationRenderer INSTANCE = new SaturationRenderer();
+    private static final ResourceRenderer RESOURCE_RENDERER = Laby.labyAPI().renderPipeline()
+        .resourceRenderer();
 
     private boolean isSaturationLevelEnabled = false;
     private boolean isExpectedSaturationEnabled = false;
 
+    private int printed = 0;
 
-    public SaturationRenderer(@Nullable Float saturationValueOfItem) { //Für Version <= 1.20.4
-        ClientPlayer player = Laby.labyAPI().minecraft().getClientPlayer();
-        if(player == null) throw new RuntimeException("Client player is null!");
-
-        saturationLevel = player.foodData().getSaturationLevel();
-        if(saturationValueOfItem == null) saturationLevelAfterEating = saturationLevel + Utils.getFoodSaturationValue();
-        else saturationLevelAfterEating = saturationValueOfItem + saturationLevel;
-
-        BetterFoodHud instance = BetterFoodHud.getInstance();
-        if (instance != null) {
-            isSaturationLevelEnabled = instance.configuration().enabled().get() && instance.configuration().showCurrentSaturation().get();
-            isExpectedSaturationEnabled = instance.configuration().enabled().get() && instance.configuration().showSaturationIncrement().get();
-        }
+    public void renderNextSaturation(Stack renderStack, int xPos, int yPos, float saturationLevel) {
+        this.renderNextSaturation(renderStack, xPos, yPos, Float.MIN_VALUE, saturationLevel);
     }
 
-    public SaturationRenderer() { //Für Version >= 1.20.5
-        this(null);
-    }
+    public void renderNextSaturation(Stack renderStack, int xPos, int yPos, float saturationValueOfItem, float saturationLevel) {
+        float saturationLevelAfterEating = saturationLevel + (saturationValueOfItem == Float.MIN_VALUE ? Utils.getFoodSaturationValue() : saturationValueOfItem);
 
+        Config configuration = BetterFoodHud.getInstance().configuration();
+        isSaturationLevelEnabled = configuration.showCurrentSaturation().get();
+        isExpectedSaturationEnabled = configuration.showSaturationIncrement().get();
 
-    public void renderNextSaturation(Stack renderStack, int xPos, int yPos) {
         boolean renderExpectedSaturation = isExpectedSaturationEnabled && saturationLevel != saturationLevelAfterEating;
         if(isSaturationLevelEnabled || renderExpectedSaturation) render(renderStack, saturationLevel, xPos, yPos, 1);
         if(renderExpectedSaturation) {
@@ -54,10 +49,14 @@ public class SaturationRenderer {
 
         if(print == Print.NONE || opacity < 0.01f) return;
 
-        Laby.references().renderPipeline().resourceRenderer().texture(print.getLocation()).pos(xPos, yPos, xPos + 9, yPos + 9)
+        RESOURCE_RENDERER.texture(print.getLocation()).pos(xPos, yPos, xPos + 9, yPos + 9)
             .sprite(0, 0, 256, 256)
             .color(1f, 1f, 1f, opacity)
             .render(renderStack);
+    }
+
+    public void resetPrinted() {
+        this.printed = 0;
     }
 
 

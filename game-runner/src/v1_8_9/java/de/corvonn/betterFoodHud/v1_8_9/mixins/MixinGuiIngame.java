@@ -3,6 +3,7 @@ package de.corvonn.betterFoodHud.v1_8_9.mixins;
 import de.corvonn.betterFoodHud.utils.SaturationRenderer;
 import de.corvonn.betterFoodHud.utils.Utils;
 import net.labymod.api.Laby;
+import net.labymod.api.client.render.gl.GlStateBridge;
 import net.labymod.v1_8_9.client.render.matrix.VersionedStackProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -75,8 +76,6 @@ public class MixinGuiIngame extends Gui {
             }
 
             int calculatedHealing = Utils.calculateHealing(saturationValueOfItem, nutritionValueOfItem, false);
-            SaturationRenderer renderer = new SaturationRenderer(saturationValueOfItem);
-
 
             int foodLevel = player.getFoodStats().getFoodLevel();
             int foodLevelAfterEating = foodLevel + nutritionValueOfItem;
@@ -208,7 +207,8 @@ public class MixinGuiIngame extends Gui {
                     //AddOn Method
 
                     if(Utils.showEstimatedHealthIncrement()) {
-                        Laby.references().glStateBridge().color4f(1, 1, 1, Utils.getBlinkingOpacity());
+                        GlStateBridge glStateBridge = Laby.references().glStateBridge();
+                        glStateBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                         if (lvt_22_2_ * 2 + 1 < calculatedHealing + playerHealth) {
                             this.drawTexturedModalRect(lvt_26_1_, lvt_27_1_, lvt_23_2_ + 36, 9 * lvt_28_1_, 9, 9);
                         }
@@ -216,7 +216,7 @@ public class MixinGuiIngame extends Gui {
                         if (lvt_22_2_ * 2 + 1 == calculatedHealing + playerHealth) {
                             this.drawTexturedModalRect(lvt_26_1_, lvt_27_1_, lvt_23_2_ + 45, 9 * lvt_28_1_, 9, 9);
                         }
-                        Laby.references().glStateBridge().resetColor();
+                        glStateBridge.resetColor();
                     }
                 }
             }
@@ -265,7 +265,8 @@ public class MixinGuiIngame extends Gui {
                     //AddOn Methods
 
                     if(Utils.showFoodIncrement()) {
-                        Laby.references().glStateBridge().color4f(1, 1, 1, Utils.getBlinkingOpacity());
+                        GlStateBridge glStateBridge = Laby.references().glStateBridge();
+                        glStateBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                         if (lvt_23_2_ * 2 + 1 < foodLevelAfterEating) {
                             this.drawTexturedModalRect(lvt_27_1_, lvt_24_2_, lvt_25_2_ + 36, 27, 9, 9);
                         }
@@ -273,10 +274,10 @@ public class MixinGuiIngame extends Gui {
                         if (lvt_23_2_ * 2 + 1 == foodLevelAfterEating) {
                             this.drawTexturedModalRect(lvt_27_1_, lvt_24_2_, lvt_25_2_ + 45, 27, 9, 9);
                         }
-                        Laby.references().glStateBridge().resetColor();
+                        glStateBridge.resetColor();
                     }
 
-                    renderer.renderNextSaturation(VersionedStackProvider.DEFAULT_STACK, lvt_27_1_, lvt_24_2_);
+                    SaturationRenderer.INSTANCE.renderNextSaturation(VersionedStackProvider.DEFAULT_STACK, lvt_27_1_, lvt_24_2_, player.getFoodStats().getSaturationLevel(), saturationValueOfItem);
 
                     //End AddOn
                 }
@@ -335,6 +336,8 @@ public class MixinGuiIngame extends Gui {
 
             this.mc.mcProfiler.endSection();
         }
+
+        SaturationRenderer.INSTANCE.resetPrinted();
 
         ci.cancel();
     }

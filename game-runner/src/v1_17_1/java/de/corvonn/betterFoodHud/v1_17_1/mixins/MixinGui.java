@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.corvonn.betterFoodHud.utils.SaturationRenderer;
 import de.corvonn.betterFoodHud.utils.Utils;
 import net.labymod.api.Laby;
+import net.labymod.api.client.render.gl.GlStateBridge;
 import net.labymod.api.client.render.matrix.Stack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -69,6 +70,7 @@ public abstract class MixinGui extends GuiComponent {
 
         Player player = this.getCameraPlayer();
         if (player != null) {
+            Stack stack = Stack.create(poseStack);
 
             int nutritionValueOfItem = 0;
             float saturationValueOfItem = 0;
@@ -82,7 +84,6 @@ public abstract class MixinGui extends GuiComponent {
             }
 
             int calculatedHealing = Utils.calculateHealing(saturationValueOfItem, nutritionValueOfItem, true);
-            SaturationRenderer renderer = new SaturationRenderer(saturationValueOfItem);
 
             int foodLevel = player.getFoodData().getFoodLevel();
             int foodLevelAfterEating = foodLevel + nutritionValueOfItem;
@@ -184,7 +185,8 @@ public abstract class MixinGui extends GuiComponent {
 
 
                     if(Utils.showFoodIncrement() && foodLevelAfterEating > player.getFoodData().getFoodLevel()) {
-                        Laby.references().glStateBridge().color4f(1, 1, 1, Utils.getBlinkingOpacity());
+                        GlStateBridge glStateBridge = Laby.references().glStateBridge();
+                        glStateBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                         if (lvt_23_1_ * 2 + 1 < foodLevelAfterEating) {
                             this.blit(poseStack, lvt_27_1_, lvt_24_1_, lvt_25_1_ + 36, 27, 9, 9);
                         }
@@ -192,10 +194,10 @@ public abstract class MixinGui extends GuiComponent {
                         if (lvt_23_1_ * 2 + 1 == foodLevelAfterEating) {
                             this.blit(poseStack, lvt_27_1_, lvt_24_1_, lvt_25_1_ + 45, 27, 9, 9);
                         }
-                        Laby.references().glStateBridge().resetColor();
+                        glStateBridge.resetColor();
                     }
 
-                    renderer.renderNextSaturation(Stack.create(poseStack), lvt_27_1_, lvt_24_1_);
+                    SaturationRenderer.INSTANCE.renderNextSaturation(stack, lvt_27_1_, lvt_24_1_, player.getFoodData().getSaturationLevel(), saturationValueOfItem);
                     RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
                 }
 
@@ -223,6 +225,7 @@ public abstract class MixinGui extends GuiComponent {
             this.minecraft.getProfiler().pop();
         }
 
+        SaturationRenderer.INSTANCE.resetPrinted();
         ci.cancel();
     }
 
@@ -273,7 +276,8 @@ public abstract class MixinGui extends GuiComponent {
 
             //AddOnMethod
             if(Utils.showEstimatedHealthIncrement() && calculatedHealing != 0) {
-                Laby.references().glStateBridge().color4f(1, 1, 1, Utils.getBlinkingOpacity());
+                GlStateBridge glStateBridge = Laby.references().glStateBridge();
+                glStateBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                 int healthAfterHealing = calculatedHealing + displayHealth;
                 if (lvt_11_1_ && lvt_22_1_ < healthAfterHealing) {
                     renderHalfHeart = lvt_22_1_ + 1 == healthAfterHealing;
@@ -284,7 +288,7 @@ public abstract class MixinGui extends GuiComponent {
                     renderHalfHeart = lvt_22_1_ + 1 == healthAfterHealing;
                     this.betterFoodHUD$renderHeart(poseStack, lvt_12_1_, lvt_20_1_, lvt_21_1_, lvt_13_1_, false, renderHalfHeart);
                 }
-                Laby.references().glStateBridge().resetColor();
+                glStateBridge.resetColor();
             }
         }
 

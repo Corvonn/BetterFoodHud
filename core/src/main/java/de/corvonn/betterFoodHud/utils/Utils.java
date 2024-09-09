@@ -1,6 +1,8 @@
 package de.corvonn.betterFoodHud.utils;
 
 import de.corvonn.betterFoodHud.BetterFoodHud;
+import de.corvonn.betterFoodHud.configs.BlinkingSettings;
+import de.corvonn.betterFoodHud.configs.Config;
 import net.labymod.api.Laby;
 import net.labymod.api.client.entity.player.ClientPlayer;
 import net.labymod.api.client.world.food.FoodData;
@@ -12,21 +14,16 @@ import net.labymod.api.nbt.tags.NBTTagCompound;
 public class Utils {
     public static final String ADDON_ICONS_LOCATION = "icons.png";
     public static final String NAMESPACE = "betterfoodhud";
+    private static final Config CONFIG = BetterFoodHud.getInstance().configuration();
 
     //////////////////////////////////////////////////////////////////////////////////////////////// Blinking
 
-    public static float getBlinkingOpacity() {
-        int blinkingSpeed = 1250;
-        float maxOpacity = 1.0f;
-        boolean blinking = true;
-        BetterFoodHud instance = BetterFoodHud.getInstance();
-        if (instance != null) {
-            blinkingSpeed = instance.configuration().blinkingSettings().speed().get();
-            maxOpacity = instance.configuration().maxOpacity().get() / 100f;
-            blinking = instance.configuration().blinkingSettings().isEnabled().get();
-        }
+    public static float getBlinkingOpacity() {;
+        BlinkingSettings blinkingSettings = CONFIG.blinkingSettings();
+        int blinkingSpeed = blinkingSettings.speed().get();
+        float maxOpacity = CONFIG.maxOpacity().get() / 100f;
 
-        if (!blinking) return maxOpacity;
+        if (!blinkingSettings.isEnabled().get()) return maxOpacity;
 
         float f = ((System.currentTimeMillis() % blinkingSpeed) / (float) blinkingSpeed * 2);
         if(f > 1) f = 2 - f;
@@ -103,20 +100,14 @@ public class Utils {
     //////////////////////////////////////////////////////////////////////////////////////////////// Settings Utils
 
     public static boolean showEstimatedHealthIncrement() {
-        BetterFoodHud instance = BetterFoodHud.getInstance();
-        if(instance == null) return false;
-        return instance.configuration().showEstimatedHealthIncrement().get();
+        return CONFIG.showEstimatedHealthIncrement().get();
     }
 
     public static boolean showFoodIncrement() {
-        BetterFoodHud instance = BetterFoodHud.getInstance();
-        if(instance == null) return false;
-        return instance.configuration().showFoodIncrement().get();
+        return CONFIG.showFoodIncrement().get();
     }
 
     public static boolean isAddOnEnabled() {
-        BetterFoodHud instance = BetterFoodHud.getInstance();
-        if(instance == null) return false;
-        return instance.configuration().enabled().get();
+        return CONFIG.enabled().get();
     }
 }

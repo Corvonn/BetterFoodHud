@@ -9,18 +9,21 @@ import org.jetbrains.annotations.Nullable;
 public class BetterFoodHud extends LabyAddon<Config> {
     private static BetterFoodHud instance;
 
-  @Override
-  protected void enable() {
+    public BetterFoodHud() {
+        instance = this;
+    }
+
+    @Override
+    protected void enable() {
     this.registerSettingCategory();
-    instance = this;
-  }
+    }
 
-  @Override
-  protected Class<Config> configurationClass() {
+    @Override
+    protected Class<Config> configurationClass() {
     return Config.class;
-  }
+    }
 
-  public static @Nullable BetterFoodHud getInstance() {
-      return instance;
-  }
+    public static BetterFoodHud getInstance() {
+    return instance;
+    }
 }

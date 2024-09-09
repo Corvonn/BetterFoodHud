@@ -67,6 +67,8 @@ public abstract class MixinGui extends GuiComponent {
         Player player = this.getCameraPlayer();
         if (player != null) {
 
+            Stack stack = Stack.create(poseStack);
+
             int nutritionValueOfItem = 0;
             float saturationValueOfItem = 0;
 
@@ -81,7 +83,6 @@ public abstract class MixinGui extends GuiComponent {
             }
 
             int calculatedHealing = Utils.calculateHealing(saturationValueOfItem, nutritionValueOfItem, true);
-            SaturationRenderer renderer = new SaturationRenderer(saturationValueOfItem);
 
             int foodLevel = player.getFoodData().getFoodLevel();
             int foodLevelAfterEating = foodLevel + nutritionValueOfItem;
@@ -266,7 +267,7 @@ public abstract class MixinGui extends GuiComponent {
                         Laby.references().glStateBridge().resetColor();
                     }
 
-                    renderer.renderNextSaturation(Stack.create(poseStack), lvt_28_1_, lvt_25_2_);
+                    SaturationRenderer.INSTANCE.renderNextSaturation(stack, lvt_28_1_, lvt_25_2_, player.getFoodData().getSaturationLevel(), saturationValueOfItem);
 
                     //End AddOn
                 }
@@ -295,6 +296,7 @@ public abstract class MixinGui extends GuiComponent {
             this.minecraft.getProfiler().pop();
         }
 
+        SaturationRenderer.INSTANCE.resetPrinted();
         ci.cancel();
     }
 

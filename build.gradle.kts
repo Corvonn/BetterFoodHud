@@ -16,7 +16,7 @@ labyMod {
         displayName = "Better Food HUD"
         author = "Corvonn"
         description = "Provides some helpful features to the HUD related to food."
-        minecraftVersion = "1.8.9<1.21"
+        minecraftVersion = "1.8.9<1.21.1"
         version = System.getenv().getOrDefault("VERSION", "1.0.1")
     }
 

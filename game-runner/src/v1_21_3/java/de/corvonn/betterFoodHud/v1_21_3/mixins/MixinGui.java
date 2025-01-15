@@ -1,21 +1,21 @@
-package de.corvonn.betterFoodHud.v1_21.mixins;
+package de.corvonn.betterFoodHud.v1_21_3.mixins;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.corvonn.betterFoodHud.utils.SaturationRenderer;
 import de.corvonn.betterFoodHud.utils.Utils;
-import net.labymod.api.Laby;
-import net.labymod.api.client.gfx.GFXBridge;
-import net.labymod.api.client.render.gl.GlStateBridge;
 import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.render.matrix.VanillaStackAccessor;
+import net.labymod.api.util.color.format.ColorFormat;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.Gui.HeartType;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Gui.class)
-public abstract class MixinGui{
+public abstract class MixinGui {
 
     @Shadow
     @Final
@@ -57,17 +57,15 @@ public abstract class MixinGui{
     @Final
     private RandomSource random;
 
-
-
-
     @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
     private void mixinRenderFood(GuiGraphics guiGraphics, Player player, int $$2, int $$3, CallbackInfo ci) {
         if(!Utils.isAddOnEnabled()) return;
 
-        RenderSystem.enableBlend();
+        FoodData foodData = player.getFoodData();
+        int foodLevel = foodData.getFoodLevel();
 
-        int foodLevel = player.getFoodData().getFoodLevel();
         int foodLevelAfterEating = foodLevel + Utils.getFoodNutritionValue();
+        int blinkingOpacity = ColorFormat.ARGB32.pack(1, 1, 1, Utils.getBlinkingOpacity());
 
         for(int printed = 0; printed < 10; ++printed) {
             int yPos = $$2;
@@ -84,7 +82,7 @@ public abstract class MixinGui{
                 fullSprite = FOOD_FULL_SPRITE;
             }
 
-            if (player.getFoodData().getSaturationLevel() <= 0.0F && this.tickCount % (foodLevel * 3 + 1) == 0) {
+            if (foodData.getSaturationLevel() <= 0.0F && this.tickCount % (foodLevel * 3 + 1) == 0) {
                 yPos += this.random.nextInt(3) - 1;
             }
 
@@ -92,40 +90,36 @@ public abstract class MixinGui{
 
             //Default rendering - Minecraft
 
-            guiGraphics.blitSprite(emptySprite, xPos, yPos, 9, 9);
+            guiGraphics.blitSprite(RenderType::guiTextured, emptySprite, xPos, yPos, 9, 9);
             if (printed * 2 + 1 < foodLevel) {
-                guiGraphics.blitSprite(fullSprite, xPos, yPos, 9, 9);
+                guiGraphics.blitSprite(RenderType::guiTextured, fullSprite, xPos, yPos, 9, 9);
             }
 
             if (printed * 2 + 1 == foodLevel) {
-                guiGraphics.blitSprite(halfSprite, xPos, yPos, 9, 9);
+                guiGraphics.blitSprite(RenderType::guiTextured, halfSprite, xPos, yPos, 9, 9);
             }
 
             //Additional rendering - AddOn (blinking saturation bar)
 
             if(Utils.showFoodIncrement() && foodLevelAfterEating != foodLevel) {
-                GFXBridge gfxBridge = Laby.gfx();
-                gfxBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                 if (printed * 2 + 1 < foodLevelAfterEating) {
-                    guiGraphics.blitSprite(fullSprite, xPos, yPos, 9, 9);
+                    guiGraphics.blitSprite(RenderType::guiTextured, fullSprite, xPos, yPos, 9, 9, blinkingOpacity);
                 }
 
                 if (printed * 2 + 1 == foodLevelAfterEating) {
-                    guiGraphics.blitSprite(halfSprite, xPos, yPos, 9, 9);
+                    guiGraphics.blitSprite(RenderType::guiTextured, halfSprite, xPos, yPos, 9, 9, blinkingOpacity);
                 }
-
-                gfxBridge.color4f(1, 1, 1, 1);
             }
 
             //Additional rendering - AddOn (golden outlines)
 
-            SaturationRenderer.INSTANCE.applyRenderJob(xPos, yPos, player.getFoodData().getSaturationLevel());
+            SaturationRenderer.INSTANCE.applyRenderJob(xPos, yPos, foodData.getSaturationLevel());
 
             //End AddOn
         }
 
+        guiGraphics.flush();
         SaturationRenderer.INSTANCE.flush(((VanillaStackAccessor) guiGraphics.pose()).stack());
-        RenderSystem.disableBlend();
         ci.cancel();
     }
 
@@ -143,6 +137,7 @@ public abstract class MixinGui{
         int maxLivingAmount = maxHearts * 2;
         int calculatedHealing = Utils.calculateHealing();
 
+        int blinkingOpacity = ColorFormat.ARGB32.pack(1, 1, 1, Utils.getBlinkingOpacity());
         for(int i = maxHearts + absorptionHearts - 1; i >= 0; --i) {
             int row = i / 10;
             int column = i % 10;
@@ -178,14 +173,12 @@ public abstract class MixinGui{
                 this.renderHeart(guiGraphics, type, xPos, yPos, hardcore, false, renderHalfHeart);
             }
 
+
             //AddOn Method
 
             if(currentHeart < calculatedHealing + playerHealth && calculatedHealing != 0) {
-                GFXBridge bridge = Laby.gfx();
-                bridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                 renderHalfHeart = currentHeart + 1 == calculatedHealing + playerHealth;
-                this.renderHeart(guiGraphics, type, xPos, yPos, hardcore, false, renderHalfHeart);
-                bridge.color4f(1, 1, 1, 1);
+                guiGraphics.blitSprite(RenderType::guiTextured, type.getSprite(hardcore, renderHalfHeart, false), xPos, yPos, 9, 9, blinkingOpacity);
             }
 
             //End AddOn
@@ -195,6 +188,6 @@ public abstract class MixinGui{
     }
 
     @Shadow
-    protected abstract void renderHeart(GuiGraphics $$0, HeartType $$1, int $$2, int $$3,
-        boolean $$4, boolean $$5, boolean $$6);
+    protected abstract void renderHeart(GuiGraphics par1, HeartType par2, int par3, int par4,
+        boolean par5, boolean par6, boolean par7);
 }

@@ -3,8 +3,10 @@ package de.corvonn.betterFoodHud.v1_20_4.mixins;
 import de.corvonn.betterFoodHud.utils.SaturationRenderer;
 import de.corvonn.betterFoodHud.utils.Utils;
 import net.labymod.api.Laby;
+import net.labymod.api.client.gfx.GFXBridge;
 import net.labymod.api.client.render.gl.GlStateBridge;
 import net.labymod.api.client.render.matrix.Stack;
+import net.labymod.api.client.render.matrix.VanillaStackAccessor;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -116,7 +118,7 @@ public abstract class MixinGui {
 
         Player player = this.getCameraPlayer();
         if (player != null) {
-            Stack stack = Stack.create(guiGraphics.pose());
+            Stack stack = ((VanillaStackAccessor) guiGraphics.pose()).stack();
             int $$2 = Mth.ceil(player.getHealth());
             boolean $$3 = this.healthBlinkTime > (long)this.tickCount && (this.healthBlinkTime - (long)this.tickCount) / 3L % 2L == 1L;
             long $$4 = Util.getMillis();
@@ -229,8 +231,8 @@ public abstract class MixinGui {
                     //Additional rendering - AddOn (blinking saturation bar)
 
                     if(Utils.showFoodIncrement() && foodLevelAfterEating != foodLevel) {
-                        GlStateBridge glStateBridge = Laby.references().glStateBridge();
-                        glStateBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
+                        GFXBridge bridge = Laby.gfx();
+                        bridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                         if (printed * 2 + 1 < foodLevelAfterEating) {
                             guiGraphics.blitSprite(fullSprite, xPos, yPos, 9, 9);
                         }
@@ -239,17 +241,17 @@ public abstract class MixinGui {
                             guiGraphics.blitSprite(halfSprite, xPos, yPos, 9, 9);
                         }
 
-                        glStateBridge.resetColor();
+                        bridge.color4f(1,1,1,1);
                     }
 
                     //Additional rendering - AddOn (golden outlines)
 
-                    SaturationRenderer.INSTANCE.renderNextSaturation(stack, xPos, yPos, player.getFoodData().getSaturationLevel(), saturationValueOfItem);
-
+                    SaturationRenderer.INSTANCE.applyRenderJob(xPos, yPos, player.getFoodData().getSaturationLevel(), saturationValueOfItem);
 
                     //End AddOn
                 }
 
+                SaturationRenderer.INSTANCE.flush(stack);
                 $$16 -= 10;
             }
 
@@ -274,7 +276,6 @@ public abstract class MixinGui {
             this.minecraft.getProfiler().pop();
         }
 
-        SaturationRenderer.INSTANCE.resetPrinted();
         ci.cancel();
     }
 
@@ -323,12 +324,12 @@ public abstract class MixinGui {
             //AddOn Method
             if(Utils.showEstimatedHealthIncrement()) {
                 if (currentHeart < calculatedHealing + playerHealth) {
-                    GlStateBridge glStateBridge = Laby.references().glStateBridge();
-                    glStateBridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
+                    GFXBridge bridge = Laby.gfx();
+                    bridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
                     renderHalfHeart = currentHeart + 1 == calculatedHealing + playerHealth;
                     this.renderHeart(guiGraphics, type, xPos, yPos, hardcore, false,
                         renderHalfHeart);
-                    glStateBridge.resetColor();
+                    bridge.color4f(1,1,1,1);
                 }
             }
 

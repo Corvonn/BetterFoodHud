@@ -7,7 +7,7 @@ plugins {
 val versions = providers.gradleProperty("net.labymod.minecraft-versions").get().split(";")
 
 group = "de.corvonn"
-version = providers.environmentVariable("VERSION").getOrElse("1.0.4")
+version = providers.environmentVariable("VERSION").getOrElse("1.0.3")
 
 labyMod {
     defaultPackageName = "de.corvonn.betterFoodHud" //change this to your main package name (used by all modules)
@@ -31,7 +31,7 @@ labyMod {
         displayName = "Better Food HUD"
         author = "Corvonn"
         description = "Provides some helpful features to the HUD related to food."
-        minecraftVersion = "1.8.9<1.21.1"
+        minecraftVersion = "1.8.9<1.21.4"
         version = rootProject.version.toString()
     }
 }

@@ -233,7 +233,6 @@ public abstract class MixinGui extends GuiComponent {
             this.minecraft.getProfiler().pop();
         }
 
-        SaturationRenderer.INSTANCE.resetPrinted();
         ci.cancel();
     }
 

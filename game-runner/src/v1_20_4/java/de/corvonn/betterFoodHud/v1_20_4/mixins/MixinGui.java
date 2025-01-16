@@ -4,7 +4,6 @@ import de.corvonn.betterFoodHud.utils.SaturationRenderer;
 import de.corvonn.betterFoodHud.utils.Utils;
 import net.labymod.api.Laby;
 import net.labymod.api.client.gfx.GFXBridge;
-import net.labymod.api.client.render.gl.GlStateBridge;
 import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.render.matrix.VanillaStackAccessor;
 import net.minecraft.Util;
@@ -324,9 +323,9 @@ public abstract class MixinGui {
             //AddOn Method
             if(Utils.showEstimatedHealthIncrement()) {
                 if (currentHeart < calculatedHealing + playerHealth) {
+                    renderHalfHeart = currentHeart + 1 == calculatedHealing + playerHealth;
                     GFXBridge bridge = Laby.gfx();
                     bridge.color4f(1, 1, 1, Utils.getBlinkingOpacity());
-                    renderHalfHeart = currentHeart + 1 == calculatedHealing + playerHealth;
                     this.renderHeart(guiGraphics, type, xPos, yPos, hardcore, false,
                         renderHalfHeart);
                     bridge.color4f(1,1,1,1);
